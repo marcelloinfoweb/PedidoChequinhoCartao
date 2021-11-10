@@ -1,0 +1,22 @@
+{
+    "name": "funarbe/module-pedidochequinhocartao",
+    "description": "Mostrar informa\u00e7\u00f5es do Chequinho ou Cart\u00e3o alimenta\u00e7\u00e3o no detalhe dos pedidos.",
+    "type": "magento2-module",
+    "license": "GPL-3.0",
+    "authors": [
+        {
+            "name": "Mage2Gen",
+            "email": "info@mage2gen.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Funarbe\\PedidoChequinhoCartao\\": ""
+        }
+    }
+}

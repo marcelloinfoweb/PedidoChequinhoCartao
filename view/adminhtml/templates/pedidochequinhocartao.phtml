@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * @var $block \Funarbe\PedidoChequinhoCartao\Block\Adminhtml\PedidoChequinhoCartao
+ */
+?>
+
+<div class="admin__page-section-content">
+    <div class="admin__page-section-item-content">
+        <br><?= $block->execute() ?>
+
+        <script>
+            require(['jquery', 'pedidochequinhocartao'], function($, pedidochequinhocartao) {
+                pedidochequinhocartao();
+            });
+        </script>
+
+    </div>
+</div>
