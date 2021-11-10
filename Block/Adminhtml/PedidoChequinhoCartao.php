@@ -15,7 +15,7 @@ use Magento\Sales\Model\Order;
 class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
 {
     private \Magento\Framework\HTTP\Client\Curl $_curl;
-    private \Magento\Framework\Pricing\Helper\Data $pricingHelper;
+    private \Magento\Framework\Pricing\Helper\Data $_pricingHelper;
     private \Funarbe\SupermercadoEscolaApi\Api\IntegratorRmClienteFornecedorManagementInterface $_integratorRm;
 
     /**
@@ -35,7 +35,7 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
         array $data = []
     ) {
         $this->_curl = $curl;
-        $this->pricingHelper = $pricingHelper;
+        $this->_pricingHelper = $pricingHelper;
         $this->_integratorRm = $integratorRm;
         parent::__construct($context, $data);
     }
@@ -83,8 +83,8 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
             $classificacao = $this->_integratorRm->getClassificacaoRmClienteFornecedor($customer_taxvat);
             $limiteDisponivel = $respLimitDisp[0]['LIMITEDISPONIVELCHEQUINHO'];
 
-            $limitCredito = $this->pricingHelper->currency($limitecredito, true, false);
-            $limitCreditoDisponivel = $this->pricingHelper->currency($limiteDisponivel, true, false);
+            $limitCredito = $this->_pricingHelper->currency($limitecredito, true, false);
+            $limitCreditoDisponivel = $this->_pricingHelper->currency($limiteDisponivel, true, false);
 
             return "Limite: $limitCredito <br> Limite Disponível: $limitCreditoDisponivel<br> Classificação: " . $classificacao[0]['CAMPOALFAOP2'];
         }
