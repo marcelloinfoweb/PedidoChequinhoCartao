@@ -1,10 +1,5 @@
 <?php
 
-/**
- * Copyright ©  All rights reserved.
- * See COPYING.txt for license details.
- */
-
 declare(strict_types=1);
 
 namespace Funarbe\PedidoChequinhoCartao\Block\Adminhtml;
@@ -47,10 +42,9 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
     public function execute()
     {
         $orderId = $this->_request->getParam('order_id');
-        $objectManager = ObjectManager::getInstance();
-        $order = $objectManager->create(Order::class)->load($orderId);
+        $order = ObjectManager::getInstance()->create(Order::class)->load($orderId);
         $payment = $order->getPayment()->getMethod();
-        $customer_taxvat = $order->getCustomerTaxvat();
+        $customerTaxvat = $order->getCustomerTaxvat();
 
         /**
          * @var \Magento\Store\Model\StoreManagerInterface $this- >_storeManager
@@ -60,47 +54,50 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
         $urlApiLimite = 'rest/V1/funarbe-supermercadoescolaapi/integrator-rm-cliente-fornecedor';
 
         $curlRm = $this->_curl;
-        $curlRm->get($baseUrl . $urlApiLimite . "?cpf=" . $customer_taxvat);
+        $curlRm->setOption(CURLOPT_SSL_VERIFYHOST, false);
+        $curlRm->setOption(CURLOPT_SSL_VERIFYPEER, false);
+        $curlRm->get($baseUrl . $urlApiLimite . "?cpf=" . $customerTaxvat);
         $respLimit = json_decode($curlRm->getBody(), true, 512, JSON_THROW_ON_ERROR);
 
-        $matricula = $respLimit[0]['CAMPOLIVRE'];
-        $limitecredito = $respLimit[0]['LIMITECREDITO'];
+        if (isset($respLimit[0]['CAMPOLIVRE'])) {
+            $matricula = $respLimit[0]['CAMPOLIVRE'];
+            $limiteCredito = $respLimit[0]['LIMITECREDITO'];
 
-        $curlAberturaPontoUfv = $this->_curl;
-        $curlAberturaPontoUfv->get($urlControle . "/abertura-ponto-ufv-api");
-        $responseAberturaPontoUfv = json_decode($curlAberturaPontoUfv->getBody(), true, 512, JSON_THROW_ON_ERROR);
+            $curlAberturaPontoUfv = $this->_curl;
+            $curlAberturaPontoUfv->get($urlControle . "/abertura-ponto-ufv-api");
+            $responseAberturaPontoUfv = json_decode($curlAberturaPontoUfv->getBody(), true);
 
-        $curlAberturaPontoFnb = $this->_curl;
-        $curlAberturaPontoFnb->get($urlControle . "/abertura-ponto-fnb-api");
-        $responseAberturaPontoFnb = json_decode($curlAberturaPontoFnb->getBody(), true, 512, JSON_THROW_ON_ERROR);
+            $curlAberturaPontoFnb = $this->_curl;
+            $curlAberturaPontoFnb->get($urlControle . "/abertura-ponto-fnb-api");
+            $responseAberturaPontoFnb = json_decode($curlAberturaPontoFnb->getBody(), true);
 
+            if ($payment === 'chequinho_se' && (strpos($matricula, 'F') === 0)) {
+                $dataInicio = $responseAberturaPontoFnb['data_inicio'];
+                $dataFinal = $responseAberturaPontoFnb['data_final'];
 
-        if ($payment === 'chequinho_se' && (strpos($matricula, 'F') === 0)) {
-            $dataInicio = $responseAberturaPontoFnb['data_inicio'];
-            $dataFinal = $responseAberturaPontoFnb['data_final'];
+                $respLimitDisp = $this->limiteDisponivel($customerTaxvat, $dataInicio, $dataFinal);
+                $classificacao = $this->_integratorRm->getClassificacaoRmClienteFornecedor($customerTaxvat);
+                $limiteDisponivel = $respLimitDisp[0]['LIMITEDISPONIVELCHEQUINHO'];
 
-            $respLimitDisp = $this->LimiteDisponivel($customer_taxvat, $dataInicio, $dataFinal);
-            $classificacao = $this->_integratorRm->getClassificacaoRmClienteFornecedor($customer_taxvat);
-            $limiteDisponivel = $respLimitDisp[0]['LIMITEDISPONIVELCHEQUINHO'];
+                $limitCredito = $this->_pricingHelper->currency($limiteCredito, true, false);
+                $limitCreditoDisponivel = $this->_pricingHelper->currency($limiteDisponivel, true, false);
 
-            $limitCredito = $this->_pricingHelper->currency($limitecredito, true, false);
-            $limitCreditoDisponivel = $this->_pricingHelper->currency($limiteDisponivel, true, false);
+                return "Limite: $limitCredito <br> Limite Disponível: $limitCreditoDisponivel<br> Classificação: " . $classificacao[0]['CAMPOALFAOP2'];
+            }
 
-            return "Limite: $limitCredito <br> Limite Disponível: $limitCreditoDisponivel<br> Classificação: " . $classificacao[0]['CAMPOALFAOP2'];
+            // TODO
+            // if ($payment === 'cartao_se') {
+            //     return 'Cartão Alimentação';
+            // }
+            // return false;
         }
-
-        // TODO
-        // if ($payment === 'cartao_se') {
-        //     return 'Cartão Alimentação';
-        // }
-        // return false;
     }
 
     /**
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      * @throws \JsonException
      */
-    public function LimiteDisponivel($customer_taxvat, $dataInicio, $dataFinal)
+    public function limiteDisponivel($customerTaxvat, $dataInicio, $dataFinal)
     {
         /**
          * @var \Magento\Store\Model\StoreManagerInterface $this- >_storeManager
@@ -108,7 +105,7 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
         $baseUrl = $this->_storeManager->getStore()->getBaseUrl();
 
         $curlRm = $this->_curl;
-        $curlRm->get($baseUrl . "rest/V1/funarbe-supermercadoescolaapi/integrator-rm-cliente-fornecedor-limite-disponivel?cpf=" . $customer_taxvat . "&expand=LIMITEDISPONIVELCHEQUINHO&dataAbertura=" . $dataInicio . "&dataFechamento=" . $dataFinal);
+        $curlRm->get($baseUrl . "rest/V1/funarbe-supermercadoescolaapi/integrator-rm-cliente-fornecedor-limite-disponivel?cpf=" . $customerTaxvat . "&expand=LIMITEDISPONIVELCHEQUINHO&dataAbertura=" . $dataInicio . "&dataFechamento=" . $dataFinal);
         return json_decode($curlRm->getBody(), true, 512, JSON_THROW_ON_ERROR);
     }
 }
