@@ -54,8 +54,8 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
         $urlApiLimite = 'rest/V1/funarbe-supermercadoescolaapi/integrator-rm-cliente-fornecedor';
 
         $curlRm = $this->_curl;
-        $curlRm->setOption(CURLOPT_SSL_VERIFYHOST, false);
-        $curlRm->setOption(CURLOPT_SSL_VERIFYPEER, false);
+        $curlRm->setOption(CURLOPT_SSL_VERIFYHOST, true);
+        $curlRm->setOption(CURLOPT_SSL_VERIFYPEER, true);
         $curlRm->get($baseUrl . $urlApiLimite . "?cpf=" . $customerTaxvat);
         $respLimit = json_decode($curlRm->getBody(), true, 512, JSON_THROW_ON_ERROR);
 
@@ -65,11 +65,11 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
 
             $curlAberturaPontoUfv = $this->_curl;
             $curlAberturaPontoUfv->get($urlControle . "/abertura-ponto-ufv-api");
-            $responseAberturaPontoUfv = json_decode($curlAberturaPontoUfv->getBody(), true);
+            //$responseAberturaPontoUfv = json_decode($curlAberturaPontoUfv->getBody(), true, 512, JSON_THROW_ON_ERROR);
 
             $curlAberturaPontoFnb = $this->_curl;
             $curlAberturaPontoFnb->get($urlControle . "/abertura-ponto-fnb-api");
-            $responseAberturaPontoFnb = json_decode($curlAberturaPontoFnb->getBody(), true);
+            $responseAberturaPontoFnb = json_decode($curlAberturaPontoFnb->getBody(), true, 512, JSON_THROW_ON_ERROR);
 
             if ($payment === 'chequinho_se' && (strpos($matricula, 'F') === 0)) {
                 $dataInicio = $responseAberturaPontoFnb['data_inicio'];
@@ -106,6 +106,6 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
 
         $curlRm = $this->_curl;
         $curlRm->get($baseUrl . "rest/V1/funarbe-supermercadoescolaapi/integrator-rm-cliente-fornecedor-limite-disponivel?cpf=" . $customerTaxvat . "&expand=LIMITEDISPONIVELCHEQUINHO&dataAbertura=" . $dataInicio . "&dataFechamento=" . $dataFinal);
-        return json_decode($curlRm->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        return json_decode($curlRm->getBody(), true);
     }
 }
