@@ -54,7 +54,6 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
         $urlApiLimite = 'rest/V1/funarbe-supermercadoescolaapi/integrator-rm-cliente-fornecedor';
 
         $curlRm = $this->_curl;
-        $curlRm->setOption(CURLOPT_SSL_VERIFYHOST, true);
         $curlRm->setOption(CURLOPT_SSL_VERIFYPEER, true);
         $curlRm->get($baseUrl . $urlApiLimite . "?cpf=" . $customerTaxvat);
         $respLimit = json_decode($curlRm->getBody(), true, 512, JSON_THROW_ON_ERROR);
@@ -89,7 +88,7 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
             // if ($payment === 'cartao_se') {
             //     return 'Cartão Alimentação';
             // }
-            // return false;
+//             return false;
         }
     }
 
@@ -106,6 +105,6 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
 
         $curlRm = $this->_curl;
         $curlRm->get($baseUrl . "rest/V1/funarbe-supermercadoescolaapi/integrator-rm-cliente-fornecedor-limite-disponivel?cpf=" . $customerTaxvat . "&expand=LIMITEDISPONIVELCHEQUINHO&dataAbertura=" . $dataInicio . "&dataFechamento=" . $dataFinal);
-        return json_decode($curlRm->getBody(), true);
+        return json_decode($curlRm->getBody(), true, 512, JSON_THROW_ON_ERROR);
     }
 }
