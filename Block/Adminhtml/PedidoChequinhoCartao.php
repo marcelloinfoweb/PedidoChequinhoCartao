@@ -57,7 +57,7 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
         $curlRm = $this->_curl;
         $curlRm->setOption(CURLOPT_SSL_VERIFYPEER, true);
         $curlRm->get($baseUrl . $urlApiLimite . "?cpf=" . $customerTaxvat);
-        $respLimit = json_decode($curlRm->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $respLimit = json_decode($curlRm->getBody(), true);
 
         if (isset($respLimit[0]['CAMPOLIVRE'])) {
             $matricula = $respLimit[0]['CAMPOLIVRE'];
