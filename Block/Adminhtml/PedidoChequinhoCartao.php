@@ -81,14 +81,9 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
                 $limitCredito = $this->_pricingHelper->currency($limiteCredito, true, false);
                 $limitCreditoDisponivel = $this->_pricingHelper->currency($limiteDisponivel, true, false);
 
-                return "Limite: $limitCredito <br> Limite Disponível: $limitCreditoDisponivel<br> Classificação: " . $classificacao[0]['CAMPOALFAOP2'];
+                return "Limite: $limitCredito <br> Limite Disponível: $limitCreditoDisponivel<br> Classificação: " .
+                    $classificacao[0]['CAMPOALFAOP2'];
             }
-
-            // TODO
-            // if ($payment === 'cartao_se') {
-            //     return 'Cartão Alimentação';
-            // }
-//             return false;
         }
     }
 
@@ -104,7 +99,11 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
         $baseUrl = $this->_storeManager->getStore()->getBaseUrl();
 
         $curlRm = $this->_curl;
-        $curlRm->get($baseUrl . "rest/V1/funarbe-supermercadoescolaapi/integrator-rm-cliente-fornecedor-limite-disponivel?cpf=" . $customerTaxvat . "&expand=LIMITEDISPONIVELCHEQUINHO&dataAbertura=" . $dataInicio . "&dataFechamento=" . $dataFinal);
+        $curlRm->get($baseUrl .
+            "rest/V1/funarbe-supermercadoescolaapi/integrator-rm-cliente-fornecedor-limite-disponivel?cpf=" .
+            $customerTaxvat . "&expand=LIMITEDISPONIVELCHEQUINHO&dataAbertura=" . $dataInicio . "&dataFechamento=" .
+            $dataFinal);
+
         return json_decode($curlRm->getBody(), true, 512, JSON_THROW_ON_ERROR);
     }
 }
