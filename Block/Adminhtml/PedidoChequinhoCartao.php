@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Funarbe\PedidoChequinhoCartao\Block\Adminhtml;
 
 use Magento\Framework\App\ObjectManager;
+use Magento\Framework\HTTP\Client\Curl;
 use Magento\Sales\Model\Order;
 
 class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
 {
-    private \Magento\Framework\HTTP\Client\Curl $_curl;
+    private Curl $_curl;
     private \Magento\Framework\Pricing\Helper\Data $_pricingHelper;
     private \Funarbe\SupermercadoEscolaApi\Api\IntegratorRmClienteFornecedorManagementInterface $_integratorRm;
 
@@ -23,7 +24,7 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
      * @param array $data
      */
     public function __construct(
-        \Magento\Framework\HTTP\Client\Curl $curl,
+        Curl $curl,
         \Magento\Backend\Block\Template\Context $context,
         \Magento\Framework\Pricing\Helper\Data $pricingHelper,
         \Funarbe\SupermercadoEscolaApi\Api\IntegratorRmClienteFornecedorManagementInterface $integratorRm,
@@ -81,8 +82,7 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
                 $limitCredito = $this->_pricingHelper->currency($limiteCredito, true, false);
                 $limitCreditoDisponivel = $this->_pricingHelper->currency($limiteDisponivel, true, false);
 
-                return "Limite: $limitCredito <br> Limite Disponível: $limitCreditoDisponivel<br> Classificação: " .
-                    $classificacao[0]['CAMPOALFAOP2'];
+                return "Limite: $limitCredito <br> Limite Disponível: $limitCreditoDisponivel<br> Classificação: " . $classificacao[0]['CAMPOALFAOP2'];
             }
         }
     }
@@ -99,11 +99,7 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
         $baseUrl = $this->_storeManager->getStore()->getBaseUrl();
 
         $curlRm = $this->_curl;
-        $curlRm->get($baseUrl .
-            "rest/V1/funarbe-supermercadoescolaapi/integrator-rm-cliente-fornecedor-limite-disponivel?cpf=" .
-            $customerTaxvat . "&expand=LIMITEDISPONIVELCHEQUINHO&dataAbertura=" . $dataInicio . "&dataFechamento=" .
-            $dataFinal);
-
+        $curlRm->get($baseUrl . "rest/V1/funarbe-supermercadoescolaapi/integrator-rm-cliente-fornecedor-limite-disponivel?cpf=" . $customerTaxvat . "&expand=LIMITEDISPONIVELCHEQUINHO&dataAbertura=" . $dataInicio . "&dataFechamento=" . $dataFinal);
         return json_decode($curlRm->getBody(), true, 512, JSON_THROW_ON_ERROR);
     }
 }
