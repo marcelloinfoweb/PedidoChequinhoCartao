@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace Funarbe\PedidoChequinhoCartao\Block\Adminhtml;
 
 use Magento\Framework\App\ObjectManager;
-use Magento\Framework\HTTP\Client\Curl;
 use Magento\Sales\Model\Order;
 
 class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
 {
-    private Curl $_curl;
+    private \Magento\Framework\HTTP\Client\Curl $_curl;
     private \Magento\Framework\Pricing\Helper\Data $_pricingHelper;
     private \Funarbe\SupermercadoEscolaApi\Api\IntegratorRmClienteFornecedorManagementInterface $_integratorRm;
 
@@ -24,7 +23,7 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
      * @param array $data
      */
     public function __construct(
-        Curl $curl,
+        \Magento\Framework\HTTP\Client\Curl $curl,
         \Magento\Backend\Block\Template\Context $context,
         \Magento\Framework\Pricing\Helper\Data $pricingHelper,
         \Funarbe\SupermercadoEscolaApi\Api\IntegratorRmClienteFornecedorManagementInterface $integratorRm,
