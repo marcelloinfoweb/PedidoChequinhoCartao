@@ -36,8 +36,9 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
     }
 
     /**
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @return string|void
      * @throws \JsonException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function execute()
     {
@@ -68,7 +69,7 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
 
             $curlAberturaPontoFnb = $this->_curl;
             $curlAberturaPontoFnb->get($urlControle . "/abertura-ponto-fnb-api");
-            $responseAberturaPontoFnb = json_decode($curlAberturaPontoFnb->getBody(), true, 512, JSON_THROW_ON_ERROR);
+            $responseAberturaPontoFnb = json_decode($curlAberturaPontoFnb->getBody(), true);
 
             if ($payment === 'chequinho_se' && (strpos($matricula, 'F') === 0)) {
                 $dataInicio = $responseAberturaPontoFnb['data_inicio'];
@@ -81,24 +82,31 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
                 $limitCredito = $this->_pricingHelper->currency($limiteCredito, true, false);
                 $limitCreditoDisponivel = $this->_pricingHelper->currency($limiteDisponivel, true, false);
 
-                return "Limite: $limitCredito <br> Limite Disponível: $limitCreditoDisponivel<br> Classificação: " . $classificacao[0]['CAMPOALFAOP2'];
+                return "Limite: $limitCredito <br> Limite Disponível: $limitCreditoDisponivel<br> Classificação: " .
+                    $classificacao[0]['CAMPOALFAOP2'];
             }
         }
     }
 
     /**
+     * @param $customerTaxvat
+     * @param $dataInicio
+     * @param $dataFinal
+     * @return mixed
      * @throws \Magento\Framework\Exception\NoSuchEntityException
-     * @throws \JsonException
      */
     public function limiteDisponivel($customerTaxvat, $dataInicio, $dataFinal)
     {
         /**
-         * @var \Magento\Store\Model\StoreManagerInterface $this- >_storeManager
+         * @var \Magento\Store\Model\StoreManagerInterface $this->_storeManager
          */
         $baseUrl = $this->_storeManager->getStore()->getBaseUrl();
 
         $curlRm = $this->_curl;
-        $curlRm->get($baseUrl . "rest/V1/funarbe-supermercadoescolaapi/integrator-rm-cliente-fornecedor-limite-disponivel?cpf=" . $customerTaxvat . "&expand=LIMITEDISPONIVELCHEQUINHO&dataAbertura=" . $dataInicio . "&dataFechamento=" . $dataFinal);
-        return json_decode($curlRm->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $curlRm->get($baseUrl .
+            "rest/V1/funarbe-supermercadoescolaapi/integrator-rm-cliente-fornecedor-limite-disponivel?cpf=" .
+            $customerTaxvat . "&expand=LIMITEDISPONIVELCHEQUINHO&dataAbertura=" . $dataInicio . "&dataFechamento=" .
+            $dataFinal);
+        return json_decode($curlRm->getBody(), true);
     }
 }
