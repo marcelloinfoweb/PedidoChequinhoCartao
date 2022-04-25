@@ -60,7 +60,7 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
         $respLimit = json_decode($curlRm->getBody(), true);
 
         if (isset($respLimit[0]['CAMPOLIVRE'])) {
-            $matricula = $respLimit[0]['CAMPOLIVRE'];
+//            $matricula = $respLimit[0]['CAMPOLIVRE'];
             $limiteCredito = $respLimit[0]['LIMITECREDITO'];
 
             $curlAberturaPontoUfv = $this->_curl;
@@ -71,7 +71,8 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
             $curlAberturaPontoFnb->get($urlControle . "/abertura-ponto-fnb-api");
             $responseAberturaPontoFnb = json_decode($curlAberturaPontoFnb->getBody(), true);
 
-            if ($payment === 'chequinho_se' && (strpos($matricula, 'F') === 0)) {
+//            if ($payment === 'chequinho_se' && (strpos($matricula, 'F') === 0)) {
+            if ($payment === 'chequinho_se') {
                 $dataInicio = $responseAberturaPontoFnb['data_inicio'];
                 $dataFinal = $responseAberturaPontoFnb['data_final'];
 
@@ -98,7 +99,7 @@ class PedidoChequinhoCartao extends \Magento\Backend\Block\Template
     public function limiteDisponivel($customerTaxvat, $dataInicio, $dataFinal)
     {
         /**
-         * @var \Magento\Store\Model\StoreManagerInterface $this->_storeManager
+         * @var \Magento\Store\Model\StoreManagerInterface $this- >_storeManager
          */
         $baseUrl = $this->_storeManager->getStore()->getBaseUrl();
 
